@@ -65,6 +65,41 @@ class ScalazFix extends SemanticRule("ScalazFix") {
         Patch.replaceTree(x, x.copy(name = x.name.copy("toValidationNel")).toString)
       case x: Term.Select if x.name.symbol.value == "scalaz/`\\/`#validation()." =>
         Patch.replaceTree(x, x.copy(name = x.name.copy("toValidation")).toString)
+      case x: Term.Select if x.name.symbol.value == "scalaz/EitherT#validation()." =>
+        Patch.replaceTree(x, x.copy(name = x.name.copy("toValidation")).toString)
+      case x: Importer =>
+        if (x.symbol.value == "scalaz/Leibniz.`===`#") {
+          Patch.replaceTree(x, "scalaz.===")
+        } else {
+          if (x.importees.exists(_.symbol.value == "scalaz/Leibniz.`===`#")) {
+            println((x, x.importees.map(_.symbol.value)))
+            if (x.importees.size > 1) {
+              Patch.replaceTree(
+                x,
+                x.copy(importees = x.importees.filterNot {
+                    case i: Importee.Name => i.symbol.value == "scalaz/Leibniz.`===`#"
+                    case _ => false
+                  })
+                  .toString
+              )
+            } else {
+              Patch.replaceTree(x, "")
+            }
+          } else {
+            Patch.empty
+          }
+        }
+      /*
+        case x: Importee.Name if x.symbol.value == "scalaz/Leibniz.`===`#" =>
+        if (x.toString.linesIterator.size == 1 && x.toString.contains("===")) {
+        if (x.toString.contains("===")) {
+        println("-" * 100)
+        println((x, x.symbol.value))
+          println((x.name, x.qual, x.name.symbol.value))
+      println((x.getClass, x))
+      }
+       */
+
     }.asPatch
   }
 
