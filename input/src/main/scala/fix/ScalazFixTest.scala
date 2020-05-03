@@ -61,4 +61,9 @@ trait ScalazFixTest {
 
   scalaz.std.boolean.emptyOrPure[Maybe, Int](true)(9)
   scalaz.std.boolean.emptyOrPureNT[Maybe](false)
+
+  new Divide[Equal] {
+    override def divide[A, B, C](fa: Equal[A], fb: Equal[B])(f: C => (A, B)) = ???
+    override def contramap[A, B](r: Equal[A])(f: B => A): Equal[B] = ???
+  }
 }

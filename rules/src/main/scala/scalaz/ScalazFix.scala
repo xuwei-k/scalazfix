@@ -104,6 +104,20 @@ class ScalazFix extends SemanticRule("ScalazFix") {
           Patch.removeTokens(x.paramss(0).flatMap(_.tokens.toList)),
           Patch.removeTokens(x.paramss(1).flatMap(_.tokens.toList)),
         ).asPatch
+      case x: Defn.Def
+          if List(
+            x.name.value == "divide",
+            x.tparams.size == 3,
+            x.paramss.map(_.size) == List(2, 1)
+          ).forall(identity) =>
+        Patch.replaceTree(
+          x,
+          x.copy(
+              name = Term.Name("divide2"),
+              paramss = x.paramss.head.map(p => p.copy(decltpe = p.decltpe.map(t => Type.ByName(t)))) :: x.paramss.tail
+            )
+            .toString,
+        )
     }.asPatch
   }
 
